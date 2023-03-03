@@ -1,5 +1,5 @@
+#include <cctype>
 #include <exception>
-#include <iostream>
 #include <stack>
 #include <stdexcept>
 #include <string>
@@ -21,9 +21,11 @@ std::string parse(Iterator first, Iterator last)
             p->push_back(c);
             break;
         case '1'...'9': {
-            int const k = c - '0';
+            int k = 0;
+            for (; first != last && std::isdigit(*first); k = k * 10 + (*first++ - '0'))
+                ;
 
-            if (++first == last)
+            if (first == last)
                 throw std::invalid_argument(std::string{"unexpected end of expression "} + std::to_string(k) + "[]");
 
             if (*first != '[')
