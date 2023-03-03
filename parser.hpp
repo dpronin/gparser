@@ -12,7 +12,7 @@ std::string parse(Iterator first, Iterator last)
 {
     std::string result;
 
-    std::stack<std::pair<std::string, int>> s;
+    std::stack<std::pair<std::string, uint32_t>> s;
 
     for (std::string *p = &result; first != last; ++first) {
         switch (auto const c = *first) {
@@ -21,7 +21,7 @@ std::string parse(Iterator first, Iterator last)
             p->push_back(c);
             break;
         case '1'...'9': {
-            int k = 0;
+            uint32_t k = 0;
             for (; first != last && std::isdigit(*first); k = k * 10 + (*first++ - '0'))
                 ;
 
@@ -49,7 +49,7 @@ std::string parse(Iterator first, Iterator last)
             p = s.empty() ? &result : &s.top().first;
 
             p->reserve(p->size() + k * r.size());
-            for (int n = k; n--;)
+            for (auto n = k; n--;)
                 *p += r;
         } break;
         default:
