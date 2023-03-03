@@ -9,17 +9,24 @@
 
 namespace gtask {
 
+struct params {
+    std::string::size_type out_max_len = std::numeric_limits<std::string::size_type>::max();
+};
+
 template <typename Iterator>
-std::string parse(Iterator first, Iterator last)
+std::string parse(Iterator first, Iterator last, params const &params = {})
 {
     std::string result;
-
     std::stack<std::pair<std::string, uint32_t>> s;
+
+    std::string::size_type result_estim_len = std::string::size_type{0};
 
     for (std::string *p = &result; first != last; ++first) {
         switch (auto const c = *first) {
         case 'a'...'z':
         case 'A'...'Z':
+            if (++result_estim_len > params.out_max_len)
+                throw std::range_error(std::string{"result string exceeds max len "} + std::to_string(params.out_max_len) + " given in params");
             p->push_back(c);
             break;
         case '1'...'9': {
@@ -53,6 +60,10 @@ std::string parse(Iterator first, Iterator last)
             s.pop();
             p = s.empty() ? &result : &s.top().first;
 
+            result_estim_len += (k - 1) * r.size();
+            if (result_estim_len > params.out_max_len)
+                throw std::range_error(std::string{"result string exceeds max len "} + std::to_string(params.out_max_len) + " given in params");
+
             p->reserve(p->size() + k * r.size());
             for (auto n = k; n--;)
                 *p += r;
@@ -68,9 +79,9 @@ std::string parse(Iterator first, Iterator last)
     return result;
 }
 
-inline std::string parse(std::string_view input)
+inline std::string parse(std::string_view input, params const &params = {})
 {
-    return parse(input.cbegin(), input.cend());
+    return parse(input.cbegin(), input.cend(), params);
 }
 
 } // namespace gtask
