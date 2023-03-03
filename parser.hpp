@@ -1,5 +1,7 @@
 #include <cctype>
+#include <cstdint>
 #include <exception>
+#include <limits>
 #include <stack>
 #include <stdexcept>
 #include <string>
@@ -21,9 +23,12 @@ std::string parse(Iterator first, Iterator last)
             p->push_back(c);
             break;
         case '1'...'9': {
-            uint32_t k = 0;
-            for (; first != last && std::isdigit(*first); k = k * 10 + (*first++ - '0'))
+            uint64_t k = 0;
+            for (; k <= std::numeric_limits<uint32_t>::max() && first != last && std::isdigit(*first); k = k * 10 + (*first++ - '0'))
                 ;
+
+            if (k > std::numeric_limits<uint32_t>::max())
+                throw std::overflow_error("number overflow detected before expression []");
 
             if (first == last)
                 throw std::invalid_argument(std::string{"unexpected end of expression "} + std::to_string(k) + "[]");
@@ -31,7 +36,7 @@ std::string parse(Iterator first, Iterator last)
             if (*first != '[')
                 throw std::invalid_argument(std::string{"unexpected character '"} + *first + "', expected '['");
 
-            s.push({{}, k});
+            s.push({{}, static_cast<uint32_t>(k)});
             p = &s.top().first;
 
             break;

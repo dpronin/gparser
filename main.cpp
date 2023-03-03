@@ -30,7 +30,9 @@ INSTANTIATE_TEST_SUITE_P(TestSuite,
     "a1[2]b",
     "a2[2[b3[c]4]def3[uX]]",
     "a1x[ab]",
-    "a1[10a[ab]]"
+    "a1[10a[ab]]",
+    "a4294967296[bc]",
+    "a1[b4294967296[c]]"
 ));
 
 struct TestSuccessInputs {
