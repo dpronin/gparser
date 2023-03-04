@@ -89,11 +89,17 @@ OutputIt parse(InputIt first, InputIt last, OutputIt result, params const &param
     return result;
 }
 
+template <typename OutputIt>
+inline OutputIt parse(std::string_view input, OutputIt result, params const &params = {})
+{
+    return parse(input.cbegin(), input.cend(), result, params);
+}
+
 inline std::string parse(std::string_view input, params const &params = {})
 {
     std::string result;
     result.reserve(std::min((input.size() + 1) / 2, params.out_max_len));
-    parse(input.cbegin(), input.cend(), std::back_inserter(result), params);
+    parse(input, std::back_inserter(result), params);
     return result;
 }
 

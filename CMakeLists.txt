@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
-project(parser VERSION 1.0.0 LANGUAGES CXX)
+project(gparser VERSION 1.0.0 LANGUAGES CXX)
+include(CTest)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
@@ -9,13 +10,32 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-find_package(GTest REQUIRED)
+if (BUILD_TESTING)
+    find_package(GTest REQUIRED)
 
-add_executable(${PROJECT_NAME}-test
-    main.cpp
-)
+    if (SANITIZER)
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=undefined")
+        if (${SANITIZER} MATCHES "ASAN")
+            set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
+        elseif(${SANITIZER} MATCHES "TSAN")
+            set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=thread")
+        endif()
+        if (${CMAKE_CXX_COMPILER} MATCHES ".*clang.*")
+            set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=implicit-conversion")
+        endif()
+    endif ()
 
-target_link_libraries(${PROJECT_NAME}-test PRIVATE
-    GTest::gtest
-    GTest::gtest_main
+    add_executable(${PROJECT_NAME}-ut
+        ut.cpp
+        gparser.hpp
+    )
+
+    target_link_libraries(${PROJECT_NAME}-ut PRIVATE
+        gtest::gtest
+    )
+endif ()
+
+add_executable(${PROJECT_NAME}
+    gparser.cpp
+    gparser.hpp
 )
