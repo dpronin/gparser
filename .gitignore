@@ -1,3 +1,3 @@
 .cache
 build
-*.sublime-project
+*.sublime-*
